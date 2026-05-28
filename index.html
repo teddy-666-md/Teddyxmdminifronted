@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TEDDY-XMD — Pairing Panel</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+
+:root{
+  --bg:#020402;
+  --bg2:#071107;
+  --bg3:#0d180d;
+  --bg4:#122112;
+
+  --green:#00ff88;
+  --green2:#00cc66;
+  --green3:#00ff99;
+
+  --text:#eafff1;
+  --muted:#7fa38b;
+
+  --border:rgba(0,255,136,0.15);
+  --border2:rgba(255,255,255,0.06);
+
+  --card:rgba(6,16,10,0.88);
+}
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:#000;
+  color:var(--text);
+  font-family:'Syne',sans-serif;
+  min-height:100vh;
+  overflow-x:hidden;
+  position:relative;
+}
+
+/* MATRIX BACKGROUND */
+
+canvas{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  z-index:-1;
+  opacity:.35;
+}
+
+/* NAV */
+
+nav{
+  position:sticky;
+  top:0;
+  z-index:100;
+  background:rgba(0,0,0,0.65);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  height:68px;
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  padding:0 20px;
+}
+
+.nav-logo{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  cursor:pointer;
+}
+
+.nav-logo-icon{
+  width:38px;
+  height:38px;
+  border-radius:10px;
+
+  background:
+  linear-gradient(135deg,var(--green),var(--green2));
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  font-size:1.1rem;
+  box-shadow:0 0 20px rgba(0,255,136,.3);
+}
+
+.nav-logo span{
+  font-weight:800;
+  letter-spacing:.5px;
+}
+
+.server-box{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+select{
+  background:rgba(255,255,255,0.04);
+  border:1px solid var(--border);
+  color:white;
+  padding:10px 14px;
+  border-radius:10px;
+  outline:none;
+  cursor:pointer;
+  font-weight:700;
+}
+
+/* LOADING SCREEN */
+
+.loading-screen{
+  position:fixed;
+  inset:0;
+  background:#000;
+  z-index:9999;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+
+  transition:opacity .8s ease;
+}
+
+.loader-ring{
+  width:80px;
+  height:80px;
+  border-radius:50%;
+  border:4px solid rgba(0,255,136,.15);
+  border-top-color:var(--green);
+  animation:spin 1s linear infinite;
+  margin-bottom:20px;
+}
+
+.loading-text{
+  color:var(--green);
+  font-size:1rem;
+  letter-spacing:3px;
+}
+
+@keyframes spin{
+  to{
+    transform:rotate(360deg);
+  }
+}
+
+/* MAIN */
+
+.main{
+  display:none;
+  padding:50px 20px;
+}
+
+.pair-wrap{
+  max-width:540px;
+  margin:auto;
+}
+
+.pair-box{
+  background:var(--card);
+  backdrop-filter:blur(16px);
+
+  border:1px solid var(--border);
+  border-radius:24px;
+
+  padding:36px;
+
+  box-shadow:
+  0 0 30px rgba(0,255,136,.06);
+}
+
+.pair-header{
+  text-align:center;
+  margin-bottom:30px;
+}
+
+.pair-icon{
+  width:74px;
+  height:74px;
+
+  margin:auto auto 16px;
+
+  border-radius:20px;
+
+  background:
+  linear-gradient(135deg,var(--green),var(--green2));
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  font-size:2rem;
+
+  box-shadow:
+  0 0 30px rgba(0,255,136,.25);
+}
+
+.pair-header h2{
+  font-size:2rem;
+  margin-bottom:8px;
+}
+
+.pair-header p{
+  color:var(--muted);
+}
+
+.alert{
+  padding:14px 16px;
+  border-radius:12px;
+  margin-bottom:18px;
+  display:none;
+}
+
+.alert.show{
+  display:block;
+}
+
+.alert.error{
+  background:rgba(255,0,0,.08);
+  border:1px solid rgba(255,0,0,.2);
+  color:#ff7777;
+}
+
+.alert.success{
+  background:rgba(0,255,136,.08);
+  border:1px solid rgba(0,255,136,.2);
+  color:var(--green);
+}
+
+.alert.info{
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+}
+
+input{
+  width:100%;
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--border2);
+  color:white;
+
+  padding:15px 16px;
+  border-radius:12px;
+
+  font-size:1rem;
+  margin-bottom:16px;
+
+  outline:none;
+}
+
+input:focus{
+  border-color:var(--green);
+  box-shadow:
+  0 0 15px rgba(0,255,136,.15);
+}
+
+button{
+  width:100%;
+  border:none;
+  cursor:pointer;
+
+  padding:15px;
+  border-radius:12px;
+
+  font-weight:800;
+  font-size:1rem;
+
+  transition:.3s;
+}
+
+button:hover{
+  transform:translateY(-2px);
+}
+
+.btn-primary{
+  background:
+  linear-gradient(135deg,var(--green),var(--green2));
+
+  color:#000;
+}
+
+.btn-secondary{
+  background:rgba(255,255,255,.05);
+  color:white;
+  border:1px solid rgba(255,255,255,.08);
+}
+
+.loader{
+  display:inline-block;
+  width:16px;
+  height:16px;
+
+  border:2px solid rgba(255,255,255,.15);
+  border-top-color:#000;
+
+  border-radius:50%;
+
+  animation:spin .7s linear infinite;
+}
+
+.code-box{
+  background:rgba(0,255,136,.06);
+
+  border:2px solid rgba(0,255,136,.25);
+
+  border-radius:18px;
+
+  padding:26px;
+  text-align:center;
+
+  cursor:pointer;
+}
+
+.code-val{
+  font-family:'Space Mono',monospace;
+  font-size:2.3rem;
+  letter-spacing:.25em;
+  font-weight:700;
+  color:var(--green);
+}
+
+.how{
+  margin-top:24px;
+  color:var(--muted);
+  line-height:1.7;
+}
+
+.footer{
+  margin-top:24px;
+  text-align:center;
+  color:var(--muted);
+  font-size:.9rem;
+}
+
+.toast-wrap{
+  position:fixed;
+  top:80px;
+  right:20px;
+  z-index:99999;
+}
+
+.toast{
+  background:var(--bg3);
+  border:1px solid var(--border);
+  border-radius:12px;
+
+  padding:12px 18px;
+  margin-bottom:10px;
+
+  animation:toastIn .3s ease;
+}
+
+@keyframes toastIn{
+  from{
+    opacity:0;
+    transform:translateX(50px);
+  }
+  to{
+    opacity:1;
+    transform:translateX(0);
+  }
+}
+
+@media(max-width:768px){
+
+  .pair-box{
+    padding:24px;
+  }
+
+  .code-val{
+    font-size:1.7rem;
+  }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<canvas id="matrix"></canvas>
+
+<!-- LOADING SCREEN -->
+
+<div class="loading-screen" id="loadingScreen">
+  <div class="loader-ring"></div>
+  <div class="loading-text">
+    INITIALIZING TEDDY-XMD...
+  </div>
+</div>
+
+<!-- NAV -->
+
+<nav>
+
+  <div class="nav-logo" onclick="location.reload()">
+
+    <div class="nav-logo-icon">
+      ⚡
+    </div>
+
+    <span>
+      TEDDY-XMD
+    </span>
+
+  </div>
+
+  <div class="server-box">
+
+    <select id="serverSelect" onchange="switchServer()">
+
+      <option value="server1">
+        SERVER 1
+      </option>
+
+      <option value="server2">
+        SERVER 2
+      </option>
+
+    </select>
+
+  </div>
+
+</nav>
+
+<!-- MAIN -->
+
+<div class="main" id="mainContent">
+
+<div class="pair-wrap">
+
+<div class="pair-box">
+
+<div class="pair-header">
+
+<div class="pair-icon">
+🔗
+</div>
+
+<h2>
+Pair Your Bot
+</h2>
+
+<p>
+Enter your WhatsApp number and receive a pairing code instantly
+</p>
+
+</div>
+
+<div id="pairAlert" class="alert"></div>
+
+<div id="pairForm">
+
+<input
+type="tel"
+id="pairNumber"
+placeholder="254712345678"
+/>
+
+<button
+class="btn-primary"
+onclick="doPair()"
+id="pairBtn"
+>
+
+⚡ GET PAIRING CODE
+
+</button>
+
+</div>
+
+<div
+id="pairCodeSection"
+style="display:none;margin-top:24px;"
+>
+
+<div
+class="code-box"
+onclick="copyCode()"
+>
+
+<div
+class="code-val"
+id="codeVal"
+>
+
+- - - - - - - -
+
+</div>
+
+<div
+style="margin-top:10px;color:var(--muted)"
+>
+
+Tap to copy
+
+</div>
+
+</div>
+
+<button
+class="btn-secondary"
+style="margin-top:16px"
+onclick="resetPair()"
+>
+
+NEW NUMBER
+
+</button>
+
+</div>
+
+<div class="how">
+
+<strong>How to pair:</strong><br><br>
+
+1. Open WhatsApp<br>
+2. Go to Linked Devices<br>
+3. Tap Link with phone number<br>
+4. Enter the generated code
+
+</div>
+
+<div class="footer">
+
+TEDDY-XMD • FAST • SECURE • RELIABLE
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+
+/* ================= MATRIX ================= */
+
+const canvas =
+document.getElementById('matrix');
+
+const ctx =
+canvas.getContext('2d');
+
+canvas.width =
+window.innerWidth;
+
+canvas.height =
+window.innerHeight;
+
+const letters =
+'01TEDDYXMD';
+
+const fontSize = 14;
+
+const columns =
+canvas.width / fontSize;
+
+const drops = [];
+
+for(let x = 0; x < columns; x++){
+  drops[x] = 1;
+}
+
+function drawMatrix(){
+
+  ctx.fillStyle =
+  'rgba(0,0,0,0.05)';
+
+  ctx.fillRect(
+    0,
+    0,
+    canvas.width,
+    canvas.height
+  );
+
+  ctx.fillStyle =
+  '#00ff88';
+
+  ctx.font =
+  fontSize + 'px monospace';
+
+  for(let i = 0; i < drops.length; i++){
+
+    const text =
+    letters[
+      Math.floor(Math.random() * letters.length)
+    ];
+
+    ctx.fillText(
+      text,
+      i * fontSize,
+      drops[i] * fontSize
+    );
+
+    if(
+      drops[i] * fontSize >
+      canvas.height &&
+      Math.random() > 0.975
+    ){
+      drops[i] = 0;
+    }
+
+    drops[i]++;
+
+  }
+
+}
+
+setInterval(drawMatrix, 33);
+
+/* ================= LOADING ================= */
+
+const loadTime =
+Math.floor(Math.random() * 7000) + 3000;
+
+setTimeout(() => {
+
+  const loading =
+  document.getElementById('loadingScreen');
+
+  loading.style.opacity = '0';
+
+  setTimeout(() => {
+
+    loading.style.display = 'none';
+
+    document.getElementById('mainContent')
+    .style.display = 'block';
+
+  }, 800);
+
+}, loadTime);
+
+/* ================= SERVERS ================= */
+
+const SERVERS = {
+
+  server1:
+  'https://teddyxmd1mini-1338329876db.herokuapp.com',
+
+  server2:
+  'https://teddyxmdmini2-26f273fe73c7.herokuapp.com'
+
+};
+
+let BACKEND_URL =
+SERVERS.server1;
+
+/* ================= SWITCH ================= */
+
+function switchServer(){
+
+  const selected =
+  document.getElementById('serverSelect').value;
+
+  BACKEND_URL =
+  SERVERS[selected];
+
+  toast(
+    `Switched to ${selected.toUpperCase()}`,
+    'success'
+  );
+
+}
+
+/* ================= PAIR ================= */
+
+async function doPair(){
+
+  const number =
+  document.getElementById('pairNumber')
+  .value.trim()
+  .replace(/\D/g,'');
+
+  const alertDiv =
+  document.getElementById('pairAlert');
+
+  const btn =
+  document.getElementById('pairBtn');
+
+  if(!number || number.length < 10){
+
+    alertDiv.className =
+    'alert show error';
+
+    alertDiv.innerText =
+    '❌ Enter valid WhatsApp number';
+
+    return;
+
+  }
+
+  btn.disabled = true;
+
+  btn.innerHTML =
+  '<span class="loader"></span> Connecting...';
+
+  alertDiv.className =
+  'alert show info';
+
+  alertDiv.innerText =
+  '⏳ Requesting pairing code...';
+
+  try{
+
+    const response =
+    await fetch(
+      `${BACKEND_URL}/code?number=${number}`
+    );
+
+    const data =
+    await response.json();
+
+    if(data.code){
+
+      document.getElementById('pairForm')
+      .style.display = 'none';
+
+      document.getElementById('pairCodeSection')
+      .style.display = 'block';
+
+      document.getElementById('codeVal')
+      .innerText = data.code;
+
+      await navigator.clipboard
+      .writeText(data.code);
+
+      alertDiv.className =
+      'alert show success';
+
+      alertDiv.innerText =
+      '✅ Pairing code generated successfully';
+
+      toast(
+        'Code copied to clipboard',
+        'success'
+      );
+
+    } else {
+
+      throw new Error(
+        data.error || 'Failed'
+      );
+
+    }
+
+  } catch(e){
+
+    alertDiv.className =
+    'alert show error';
+
+    alertDiv.innerText =
+    '❌ ' + e.message;
+
+  }
+
+  btn.disabled = false;
+
+  btn.innerHTML =
+  '⚡ GET PAIRING CODE';
+
+}
+
+/* ================= COPY ================= */
+
+function copyCode(){
+
+  const code =
+  document.getElementById('codeVal')
+  .innerText;
+
+  navigator.clipboard
+  .writeText(code);
+
+  toast(
+    `Copied: ${code}`,
+    'success'
+  );
+
+}
+
+/* ================= RESET ================= */
+
+function resetPair(){
+
+  document.getElementById('pairForm')
+  .style.display = 'block';
+
+  document.getElementById('pairCodeSection')
+  .style.display = 'none';
+
+  document.getElementById('pairAlert')
+  .classList.remove('show');
+
+  document.getElementById('pairNumber')
+  .value = '';
+
+}
+
+/* ================= TOAST ================= */
+
+function toast(msg){
+
+  const wrap =
+  document.getElementById('toastWrap');
+
+  const t =
+  document.createElement('div');
+
+  t.className =
+  'toast';
+
+  t.innerText =
+  msg;
+
+  wrap.appendChild(t);
+
+  setTimeout(() => {
+
+    t.remove();
+
+  }, 3500);
+
+}
+
+</script>
+
+</body>
+</html>
